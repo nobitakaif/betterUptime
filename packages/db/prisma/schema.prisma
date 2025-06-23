@@ -14,7 +14,41 @@ datasource db {
 }
 
 model User{
-  id            String @default(uuid()) @id
+  id            String    @default(uuid())    @id
   username      String
   password      String
+  website       Website[]
+}
+
+model Website{
+  id              String    @default(uuid())     @id
+  url             String
+  timeAdded       DateTime
+  ticks           WebsiteTicks[]
+  userId          String
+  user             User @relation(fields: [userId],references: [id])
+}
+
+model Region{
+  id            String      @default(uuid())    @id
+  name          String
+  ticks         WebsiteTicks[]
+}
+
+model WebsiteTicks{
+  id                  String @id    @default(uuid())
+  response_time_ms    Int
+  status              WebsiteStatus
+  region              Region   @relation(fields: [region_id],references: [id])  
+  website             Website  @relation(fields: [website_id],references: [id])
+  region_id           String
+  website_id          String
+  createdAt           DateTime   @default(now())
+}
+
+
+enum WebsiteStatus{
+  Good
+  Bad
+  Unknown
 }
