@@ -1,6 +1,10 @@
 import express from "express"
 import { client } from "db/client"
+import { createSigninSchema, createSignupSchema } from "./type"
+import bcrypt, { hash } from "bcrypt"
+
 const app = express()
+app.use(express.json())
 
 app.get("/", (req, res)=>{
     res.status(200).json({
@@ -18,6 +22,92 @@ app.post('/getuser', async (req,res)=>{
     })
     res.status(200).json({
         id : resposne.id
+    })
+    return 
+})
+
+app.post('/user/signup',async (req,res)=>{
+    const user = createSignupSchema.safeParse(req.body)
+
+    if(!user.success){
+        res.status(411).json({
+            msg:"something went wrong",
+            error: user.error
+        })
+        return 
+    }
+
+    const hashedPassword = await bcrypt.hash(user.data.password,5)
+    
+    const resposne = await client.user.create({
+        data:{
+            username:user.data.username,
+            password:hashedPassword
+        }
+    })
+    
+    res.status(200).json({
+        id:resposne.id
+    })
+    return 
+})
+
+app.post('/user/signin',async (req,res)=>{
+    const user = createSigninSchema.safeParse(req.body)
+    
+    if(!user.success){
+        res.status(411).json({
+            msg: "please give us your credential",
+            error: user.error
+        })
+        return
+    }
+
+    const resposne = await client.user.findFirst({
+        where:{
+            username:user.data.username
+        }
+    })
+
+    if(!resposne?.id){
+        res.status(403).json({
+            msg:"uesr is not present"
+        })
+        return 
+    }
+
+    const hashedPassword = await  bcrypt.compare(user.data.password, resposne.password)
+
+    if(!hashedPassword){
+        res.status(403).json({
+            msg:"incorrect password"
+        })
+        return 
+    }
+
+    res.status(200).json({
+        id:resposne.id
+    })
+    return 
+})
+
+app.post('/website', async (req,res)=>{
+    if(!req.body.url){
+        res.status(411).json({
+            msg:"url is not present"
+        })
+        return 
+    }
+
+    const website = await client.website.create({
+        data:{
+            url: req.body.url,
+            timeAdded: new Date()
+        }
+    })
+
+    res.status(200).json({
+
     })
     return 
 })
