@@ -1,7 +1,10 @@
 import express from "express"
 import { client } from "db/client"
+import jwt from "jsonwebtoken"
 import { createSigninSchema, createSignupSchema } from "./type"
 import bcrypt, { hash } from "bcrypt"
+import { authMiddleware } from "./middleware"
+
 
 const app = express()
 app.use(express.json())
@@ -37,19 +40,26 @@ app.post('/user/signup',async (req,res)=>{
         return 
     }
 
-    const hashedPassword = await bcrypt.hash(user.data.password,5)
-    
-    const resposne = await client.user.create({
-        data:{
-            username:user.data.username,
-            password:hashedPassword
-        }
+   try{
+        const hashedPassword = await bcrypt.hash(user.data.password,5)
+        
+        const resposne = await client.user.create({
+            data:{
+                username:user.data.username,
+                password:hashedPassword
+            }
+        })
+        res.status(200).json({
+            id:resposne.id
+        })
+        return 
+        
+   }catch(e){
+    res.status(401).json({
+        error: "this username is already exist"
     })
+   }
     
-    res.status(200).json({
-        id:resposne.id
-    })
-    return 
 })
 
 app.post('/user/signin',async (req,res)=>{
@@ -85,13 +95,17 @@ app.post('/user/signin',async (req,res)=>{
         return 
     }
 
+    const token = jwt.sign({
+        sub:resposne.id
+    },process.env.JWT_SCRETE!)
+    
     res.status(200).json({
-        id:resposne.id
+        token : token
     })
     return 
 })
 
-app.post('/website', async (req,res)=>{
+app.post('/website', authMiddleware, async (req,res)=>{
     if(!req.body.url){
         res.status(411).json({
             msg:"url is not present"
@@ -102,12 +116,44 @@ app.post('/website', async (req,res)=>{
     const website = await client.website.create({
         data:{
             url: req.body.url,
-            timeAdded: new Date()
+            timeAdded: new Date(),
+            userId:req.userId! 
         }
     })
 
     res.status(200).json({
+        msg:"alright",
+        id: website.id
+    })
+    return 
+})
 
+app.post("/status/:website",authMiddleware, async (req,res)=>{
+
+    const website = await client.website.findFirst({
+        where:{
+            userId:req.userId,
+            id:req.params.website
+        },
+        include:{
+            ticks:{
+                orderBy:[{
+                    createdAt:"desc" 
+                }],
+                take: 1 // take only latest one tick
+            }
+        }
+    })
+
+    if(!website){
+        res.status(409).json({
+            msg:"not found"
+        })
+        return 
+    }
+
+    res.status(200).json({
+        website:website
     })
     return 
 })
