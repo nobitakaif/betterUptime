@@ -15,7 +15,7 @@ datasource db {
 
 model User{
   id            String    @default(uuid())    @id
-  username      String
+  username      String    @unique
   password      String
   website       Website[]
 }
@@ -23,10 +23,10 @@ model User{
 model Website{
   id              String    @default(uuid())     @id
   url             String
-  timeAdded       DateTime
+  timeAdded       DateTime  @default(now())
   ticks           WebsiteTicks[]
   userId          String
-  user             User @relation(fields: [userId],references: [id])
+  user            User @relation(fields: [userId],references: [id])
 }
 
 model Region{
