@@ -13,34 +13,34 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User{
+model user{
   id            String    @default(uuid())    @id
   username      String    @unique
   password      String
-  website       Website[]
+  website       website[]
 }
 
-model Website{
+model website{
   id              String    @default(uuid())     @id
   url             String
   timeAdded       DateTime  @default(now())
-  ticks           WebsiteTicks[]
+  ticks           websiteTicks[]
   userId          String
-  user            User @relation(fields: [userId],references: [id])
+  user            user @relation(fields: [userId],references: [id])
 }
 
-model Region{
+model region{
   id            String      @default(uuid())    @id
   name          String
-  ticks         WebsiteTicks[]
+  ticks         websiteTicks[]
 }
 
-model WebsiteTicks{
+model websiteTicks{
   id                  String @id    @default(uuid())
   response_time_ms    Int
   status              WebsiteStatus
-  region              Region   @relation(fields: [region_id],references: [id])  
-  website             Website  @relation(fields: [website_id],references: [id])
+  region              region   @relation(fields: [region_id],references: [id])  
+  website             website  @relation(fields: [website_id],references: [id])
   region_id           String
   website_id          String
   createdAt           DateTime   @default(now())
