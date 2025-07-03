@@ -9,7 +9,7 @@ async function main(){
             id: true
         }
     })
-
+    console.log("checking")
     await xAddBulk(website.map(w=>({
         url: w.url,
         id: w.id
@@ -20,5 +20,5 @@ async function main(){
 // this is interval run every 3 minutes
 setInterval(()=>{
     main()
-}, 3 * 60 * 3000)
+}, 3 * 1000)
 main()

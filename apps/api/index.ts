@@ -1,4 +1,4 @@
-import express from "express"
+import express, { type Request, type Response } from "express"
 import { client } from "db/client"
 import jwt from "jsonwebtoken"
 import { createSigninSchema, createSignupSchema } from "./type"
@@ -9,7 +9,7 @@ import { authMiddleware } from "./middleware"
 const app = express()
 app.use(express.json())
 
-app.get("/", (req, res)=>{
+app.get("/", (req:Request, res:Response)=>{
     res.status(200).json({
         msg:"everything is fine"
     })
@@ -55,9 +55,9 @@ app.post('/user/signup',async (req,res)=>{
         return 
         
    }catch(e){
-    res.status(401).json({
-        error: "this username is already exist"
-    })
+        res.status(401).json({
+            error: "this username is already exist"
+        })
    }
     
 })

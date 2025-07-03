@@ -24,7 +24,7 @@ model website{
   id              String    @default(uuid())     @id
   url             String
   timeAdded       DateTime  @default(now())
-  ticks           websiteTicks[]
+  ticks           website_ticks[]
   userId          String
   user            user @relation(fields: [userId],references: [id])
 }
@@ -32,10 +32,10 @@ model website{
 model region{
   id            String      @default(uuid())    @id
   name          String
-  ticks         websiteTicks[]
+  ticks         website_ticks[]
 }
 
-model websiteTicks{
+model website_ticks{
   id                  String @id    @default(uuid())
   response_time_ms    Int
   status              WebsiteStatus
