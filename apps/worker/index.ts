@@ -30,6 +30,7 @@ async function main(){
         // process the website and the store the result in the db. # it should be probably be routed through a queue in a bulk db request 
         let response = res.map(({message}:any) => getWebsiteResponse(message.url, message.id))
         await Promise.all(response)
+        console.log(response.length)
         // ack back to the queue that this event has been processed 
         xAckBulk(REGION_ID, res.map(({id}) => id))
     
@@ -40,7 +41,7 @@ async function getWebsiteResponse( url:string, websiteId:string){
                 const startTime = Date.now()
                 axios.get(url).then(async (res)=>{
                     const endTime = Date.now()
-                    await client.websiteTicks.create({
+                    await client.website_ticks.create({
                         data:{
                             response_time_ms : endTime - startTime,
                             status: "Good",
@@ -51,7 +52,7 @@ async function getWebsiteResponse( url:string, websiteId:string){
                     resolve()
                 }).catch(async(e)=>{
                     const endTime = Date.now()
-                    await client.websiteTicks.create({
+                    await client.website_ticks.create({
                         data:{
                             response_time_ms: endTime - startTime,
                             region_id: REGION_ID,
