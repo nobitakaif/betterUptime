@@ -4,10 +4,12 @@ import jwt from "jsonwebtoken"
 import { createSigninSchema, createSignupSchema } from "./type"
 import bcrypt, { hash } from "bcrypt"
 import { authMiddleware } from "./middleware"
+import cors from "cors"
 
 
 const app = express()
 app.use(express.json())
+app.use(cors())
 
 app.get("/", (req:Request, res:Response)=>{
     res.status(200).json({
@@ -140,7 +142,7 @@ app.post("/status/:website",authMiddleware, async (req,res)=>{
                 orderBy:[{
                     createdAt:"desc" 
                 }],
-                take: 1 // take only latest one tick
+                take: 10 // take only latest  tick
             }
         }
     })
